@@ -17,11 +17,7 @@
 %                    currently are, could be the joints current position
 %   paramList = returns the desired joint variable positions
 %   error = the residual error form the function loop
-%
-% Michael Cheng
-% CWID: 10820067
-% MENG 544: Robot Mechanics: Kinematics, Dynamics, and Control
-% 11/13/2016
+
 
 function [paramList, error] = dhInvKine (linkList, desTransform, paramListGuess) 
 

@@ -10,11 +10,7 @@
 % 
 %   H = the homogeneous transformation matrix for the twist vector
 %   t = the 6 element twist vector in the form of 6x1 matrix
-%
-% Michael Cheng
-% CWID: 10820067
-% MENG 544: Robot Mechanics: Kinematics, Dynamics, and Control
-% 9/29/2016
+
 
 function H = twist2Transform(t)
 v = [t(1);t(2);t(3)];

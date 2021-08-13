@@ -27,37 +27,33 @@
 %   jointTorques = returns the torque of each joint
 %   Jv = returns the velocity jacobian of the system
 %   JvDot = returns the time derivative of the velocity jacobian
-%
-% Michael Cheng
-% CWID: 10820067
-% MENG 544: Robot Mechanics: Kinematics, Dynamics, and Control
-% 11/13/2016
 
-function [jointTorques, Jv, JvDot] = newtonEuler( linkList,paramList, paramListDot, paramListDDot,baseDynamics, endEffectorWrench,gravityDirection )
+
+function [TransformationMatrix ,jointTorques, Jv, JvDot] = newtonEuler( linkList,paramList, paramListDot, paramListDDot,baseDynamics, endEffectorWrench,gravityDirection )
 
 %Prellocating arrays
 
-linkListSym = repmat(linkList,1);
+linkListSym = repmat(linkList,1)
 
 A=length(linkList);
-Pc = zeros(3,1,A);
-m = zeros(A,1);
-I = zeros(3,3,A);
-FwdLinkTransforms = zeros(4,4,A);
-InvLinkTransforms = zeros(4,4,A);
-FwdR = zeros(3,3,A);
-InvR = zeros(3,3,A);
-FwdP = zeros(3,1,A);
-InvP = zeros(3,1,A);
-w = zeros(3,1,A+1);
-w_dot = zeros(3,1,A+1);
-v_dot = zeros(3,1,A+1);
-vc_dot = zeros(3,1,A);
-F = zeros(3,1,A);
-N = zeros(3,1,A);
-f = zeros(3,1,A+1);
-n_inward = zeros(3,1,A+1);
-torque = zeros(A,1);
+%Pc = zeros(3,1,A);
+%m = zeros(A,1);
+%I = zeros(3,3,A);
+%FwdLinkTransforms = zeros(4,4,A);
+%InvLinkTransforms = zeros(4,4,A);
+%FwdR = zeros(3,3,A);
+%InvR = zeros(3,3,A);
+%FwdP = zeros(3,1,A);
+%InvP = zeros(3,1,A);
+%w = zeros(3,1,A+1);
+%w_dot = zeros(3,1,A+1);
+%v_dot = zeros(3,1,A+1);
+%vc_dot = zeros(3,1,A);
+%F = zeros(3,1,A);
+%N = zeros(3,1,A);
+%f = zeros(3,1,A+1);
+%n_inward = zeros(3,1,A+1);
+%torque = zeros(A,1);
 
 %Inputing the base dynamics
 w(:,:,1) = baseDynamics.angV;
@@ -121,7 +117,7 @@ end
 for n = 1:1:A
     InvP(:,:,n) = InvLinkTransforms(1:3,4,n);
 end
-
+%{
 %find w list: w
 for i = 0:1:A-1
     w(:,:,(i+1)+1) = InvR(:,:,(i)+1)*w(:,:,(i)+1) + paramListDot(i+1)*[0;0;1];
@@ -138,23 +134,27 @@ for i = 0:1:A-1
 end
 
 %find vc_dot list: vc_dot
+% vc_dot = acceleration
+% Pc = center of mass
 for i = 0:1:A-1
     vc_dot(:,:,(i)+1) = cross(w_dot(:,:,(i+1)+1),Pc(:,:,i+1)) + cpMatrix(w(:,:,(i+1)+1))*cpMatrix(w(:,:,(i+1)+1))*Pc(:,:,(i)+1) + v_dot(:,:,(i+1)+1); 
 end
 
 %find F list: F
+% F = mass * accerlation
 for i = 0:1:A-1
-    F(:,:,(i)+1) = m((i)+1)*vc_dot(:,:,(i)+1);
+    F(:,:,(i)+1) = m((i)+1) * vc_dot(:,:,(i)+1);
 end
 
 %find N list: N
+% N = Inertia * w_dot
 for i = 0:1:A-1
-    N(:,:,(i)+1) = I(:,:,(i)+1)*w_dot(:,:,(i+1)+1) + cpMatrix(w(:,:,(i+1)+1))*I(:,:,(i)+1)*w(:,:,(i+1)+1);
+    N(:,:,(i)+1) = I(:,:,(i)+1) * w_dot(:,:,(i+1)+1) + cpMatrix(w(:,:,(i+1)+1)) * I(:,:,(i)+1) * w(:,:,(i+1)+1);
 end
 
 %find f list: f
 for i = A:-1:1
-    f(:,:,i) = FwdR(:,:,i)*f(:,:,i+1) + F(:,:,i);
+    f(:,:,i) = FwdR(:,:,i) * f(:,:,i+1) + F(:,:,i);
 end
 
 %find n list: n
@@ -164,16 +164,17 @@ end
 
 %find torque list: torque
 for i = 1:1:A
-    torque(i) = n_inward(:,:,i)'*[0;0;1];
+    torque(i) = n_inward(:,:,i)'* [0;0;1];
 end
+%}
 
 %Calculate Jv 
-Jv = (velocityJacobian(linkList, paramList));
+[TransformationMatrix, Jv] = (velocityJacobian(linkList, paramList));
 
 %Calculate the joint torques
-t_endEffector = Jv'*endEffectorWrench;
-jointTorques = torque + t_endEffector;
-
+%t_endEffector = Jv'*endEffectorWrench;
+%jointTorques = torque + t_endEffector;
+jointTorques = 0;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Compute JvDot
@@ -185,6 +186,7 @@ thetaDotVars = sym('thetaDot', [A 1]);
 dDotVars = sym('dDot', [A 1]);
 thetaCount=0;
 dCount=0;
+
 %Count the quantity of the variables in the linkList
 for i = 1:1:A
     if linkListSym(i).isRotary==1
@@ -193,6 +195,7 @@ for i = 1:1:A
         dCount=dCount+1;
     end
 end
+
 %Putting the symbollic variables in an array in the form of paramList: var
 varCur = 1;
 numOfVar = thetaCount + dCount;
@@ -221,22 +224,30 @@ for i = 1:1:A
         varDotCur = varDotCur+1;
     end
 end
+%Tm_symbol = sym(zeros(6,A,A));
+%Jv_symbol = sym(zeros(6,A,A));
 %Construct an symbollic representation of the velocity jacobian: Jv_symbol
-Jv_symbol = (velocityJacobian(linkListSym,var));
+[Tm_symbol Jv_symbol] = (velocityJacobian(linkListSym,var)); 
+
 %Construct symbollic JvDot
 B = length(var);
 JvDot = 0;
 for i = 1:1:B
     JvDot = JvDot + diff(Jv_symbol,var(i))*varDot(i);
 end
+
 %Substitute symbollic variables with actual corresponding paramList values
 for i = 1:1:B
     JvDot = subs(JvDot,var(i),paramList(i));
 end
+
 for i = 1:1:B
     JvDot = subs(JvDot,varDot(i),paramListDot(i));
 end
 
-Jv = double(Jv);
-JvDot = double(JvDot);
-jointTorques = double(jointTorques);
+Jv = simplify(Jv);
+JvDot = simplify(JvDot);
+
+%Jv = double(Jv);
+%JvDot = double(JvDot);
+%jointTorques = double(jointTorques);

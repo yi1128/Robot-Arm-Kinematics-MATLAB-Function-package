@@ -15,11 +15,7 @@
 %   linkList = the array consisting all the link structures, every
 %              structure consists all the information need for the link
 %   paramList = the array that consists the variables of all the links
-%
-% Michael Cheng
-% CWID: 10820067
-% MENG 544: Robot Mechanics: Kinematics, Dynamics, and Control
-% 9/29/2016
+
 
 function H = dhFwdKine(linkList, paramList)
 A = length(linkList);
@@ -37,8 +33,20 @@ for n = 1:1:A
         
     end
 end
+
+H = sym(zeros(4,4,A));
+for j = 1:1:A
+    T = 1;
+    for m = 1:1:j
+        T = T*dhTransform(linkList(m).a,linkList(m).d,linkList(m).alpha,linkList(m).theta);
+    end
+    H(:,:,j) = simplify(T);
+end
+
+%{
 H = 1;
 for m = 1:1:A
     H = H*dhTransform(linkList(m).a,linkList(m).d,linkList(m).alpha,linkList(m).theta);
 end
+%}
 end

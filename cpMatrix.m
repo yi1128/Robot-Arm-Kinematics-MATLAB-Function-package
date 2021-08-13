@@ -9,11 +9,7 @@
 % 
 %   X = the matrix packing the cross product operator of the input vector
 %   w = the input vector in the form of a 3x1 matrix
-%
-% Michael Cheng
-% CWID: 10820067
-% MENG 544: Robot Mechanics: Kinematics, Dynamics, and Control
-% 9/29/2016
+
 
 function X = cpMatrix(w)
 X=[0 -w(3) w(2);w(3) 0 -w(1);-w(2) w(1) 0];

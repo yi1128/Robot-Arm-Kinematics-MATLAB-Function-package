@@ -15,11 +15,6 @@
 %   inertia = the inertia of the link
 %   isRotary = determine whether the link is rotary or prismatic, true (1)
 %              for rotary, false (2) for prismatic
-%
-% Michael Cheng
-% CWID: 10820067
-% MENG 544: Robot Mechanics: Kinematics, Dynamics, and Control
-% 9/29/2016
 
 function L = createLink(a, d, alpha, theta, centOfMass, mass, inertia)
 

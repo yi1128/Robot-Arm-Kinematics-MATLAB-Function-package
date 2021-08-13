@@ -11,11 +11,7 @@
 %   k = the rotation axis in the form of 3x1 matrix
 %   theta = the rotation angle about the k axis
 %   R = the input rotation matrix
-%
-% Michael Cheng
-% CWID: 10820067
-% MENG 544: Robot Mechanics: Kinematics, Dynamics, and Control
-% 9/29/2016
+
 
 function [k, theta] = rot2AngleAxis(R)
 

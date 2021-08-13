@@ -12,11 +12,6 @@
 %   R = the rotation matrix of the input rotation
 %   k = the rotation axis in the form of 3x1 matrix
 %   theta = the rotation angle about the k axis
-%
-% Michael Cheng
-% CWID: 10820067
-% MENG 544: Robot Mechanics: Kinematics, Dynamics, and Control
-% 9/29/2016
 
 function R = angleAxis2Rot(k, theta)
 e1 = k(1).*sin(theta./2);
